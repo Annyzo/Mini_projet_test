@@ -22,7 +22,6 @@ const Register = (req, res) => {
   if (_firstname && _name && _email && _password && _date && _sexe ) {
 
     
-
     // Vérifiez si l'utilisateur existe déjà
     User.findOne({ email: _email }, (error, user) => {
       if (error) {
@@ -51,6 +50,7 @@ const Register = (req, res) => {
       newUser.save(async (error) => {
         if (error) {
           return res.status(400).json({
+            message: 'nonon',
             errors: error,
           });
         }
@@ -61,22 +61,23 @@ const Register = (req, res) => {
           email: newUser.email,
         };
 
-        // access-token generation
-        const accesstoken = await jwt.sign(
-          payload,
+         // access-token-generate
+        const _token = await jwt.sign(
+          { email: _email },
           secretToken,
-          {expiresIn: tokenExpire,}
+          {expiresIn:tokenExpire}
+        );
+
+        // reresh-token generation
+        const refreshtoken = await jwt.sign(
+          payload,
+          refreshTokenSecret,
+          {expiresIn: refreshTokenExpiry,}
         );
         
-        // Refresh token generation
-        const refreshToken = jwt.sign(
-          payload, 
-          refreshTokenSecret,
-          { expiresIn: refreshTokenExpiry })
-      
         const valueToken = {
-          token: accesstoken,
-          refresh_token: refreshToken,
+          token: _token,
+          refresh_token: refreshtoken,
           createdAt: newUser.createdAt,
         }
         return res.status(201).json({
@@ -88,7 +89,7 @@ const Register = (req, res) => {
 
   } else {
     return res.status(401).json({
-      error: "L'une ou plusieur des donnes obigatoire sont manquqant",
+      error: "L'une ou plusieur des donnes obigatoire sont manquant",
     });
   }
 

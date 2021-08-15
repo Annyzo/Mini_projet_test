@@ -16,7 +16,8 @@ const Login = (req, res) => {
 
       if (!user) {
         return res.status(404).json({
-          errors: 'user not found',
+          error: true,
+          message: "Votre mail ou password est errone"
         });
       }
 
@@ -32,7 +33,8 @@ const Login = (req, res) => {
 
           if (!isMatch) {
             return res.status(401).json({
-              errors: 'wrong password',
+              errors: true,
+              message: "Votre mail ou password est errone"
             });
           }
 
@@ -41,19 +43,25 @@ const Login = (req, res) => {
             email: user.email,
           };
 
-          const token = await jwt.sign(payload, 'secretKey');
+          const refreshtoken = await jwt.sign(payload, 'secretKey');
+          const valueToken = {
+            token: user.token,
+            refresh_token: refreshtoken,
+            createdAt: user.createdAt,
+          }
 
           return res.status(200).json({
-            message: 'login success',
-            data: user,
-            token: token,
+            error: true,
+            message: "L'utilisateur a ete authentifie succes",
+            token: valueToken,
           });
         }
       );
     });
   } else {
     return res.status(422).json({
-      errors: 'email/password missings',
+      error: true,
+      message: "L'email/password est manquant",
     });
   }
 };

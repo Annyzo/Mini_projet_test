@@ -2,9 +2,7 @@ const User = require ('../../models/user') ;
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-
-
-const ShowOneUser = async (req, res) => {
+const DeconnectUser = async (req, res) => {
   const _token = req.params.token;
   const secretToken = process.env.ACCESS_TOKEN_SECRET ;
 
@@ -30,18 +28,18 @@ const ShowOneUser = async (req, res) => {
     if (decoded){
       const _email = decoded.email;
 
-      User.findOne({email: _email}, (error, user) => {
+      User.findOneAndDelete({email: _email}, (error, user) => {
         if (!user) {
-          return res.status(404).json({
-            error: true,
-            message: 'user introuvable',
-          });
+            return res.status(404).json({
+              error: true,
+              message: 'user introuvable',
+            });
         }
         
         if (user) {
           return res.status(200).json({
             error: false,
-            user
+            message: "L'utilisateur a ete deconnect succe"
     
           });
         }
@@ -52,4 +50,4 @@ const ShowOneUser = async (req, res) => {
   })
 };
 
-module.exports = ShowOneUser;
+module.exports = DeconnectUser;

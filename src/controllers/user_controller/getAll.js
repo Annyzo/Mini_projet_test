@@ -4,7 +4,7 @@ require('dotenv').config();
 
 
 
-const ShowOneUser = async (req, res) => {
+const ShowAllUser = async (req, res) => {
   const _token = req.params.token;
   const secretToken = process.env.ACCESS_TOKEN_SECRET ;
 
@@ -28,21 +28,11 @@ const ShowOneUser = async (req, res) => {
     }
 
     if (decoded){
-      const _email = decoded.email;
-
-      User.findOne({email: _email}, (error, user) => {
-        if (!user) {
-          return res.status(404).json({
-            error: true,
-            message: 'user introuvable',
-          });
-        }
-        
+      User.find({}, (error, user) => {
         if (user) {
           return res.status(200).json({
             error: false,
             user
-    
           });
         }
       })
@@ -52,4 +42,4 @@ const ShowOneUser = async (req, res) => {
   })
 };
 
-module.exports = ShowOneUser;
+module.exports = ShowAllUser;

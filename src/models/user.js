@@ -37,7 +37,7 @@ let UserSchema = new Schema(
     sexe: {
       type: String,
       require: true,
-    }
+    },
   },
   { timestamps: true }
 
