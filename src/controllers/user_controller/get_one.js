@@ -30,14 +30,14 @@ const ShowOneUser = async (req, res) => {
     if (decoded){
       const _email = decoded.email;
 
-      User.findOne({email: _email}, (error, user) => {
+      User.findOne({email: _email},{_id:0, password:0, updatedAt:0} ,(error, user) => {
         if (!user) {
           return res.status(404).json({
             error: true,
             message: 'user introuvable',
           });
         }
-        
+
         if (user) {
           return res.status(200).json({
             error: false,
