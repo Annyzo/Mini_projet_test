@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
 
-const Register = (req, res) => {
+const Register = async (req, res) => {
   const _firstname = req.body.firstname
   const _name = req.body.name
   const _email = req.body.email;
@@ -16,6 +16,16 @@ const Register = (req, res) => {
   const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
   const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY;
 
+  await body('email').isEmail().run(req);
+  await body('password').isLength({ min: 4 }).run(req);
+
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(401).json({ 
+      error: true,
+      message :"L'un ou plusieur des donnees obligatoire ne sont pas conforme " });
+  }
+
 
   // console.log('voila',_email)
 
@@ -25,7 +35,7 @@ const Register = (req, res) => {
     // Vérifiez si l'utilisateur existe déjà
     User.findOne({ email: _email }, (error, user) => {
       if (error) {
-        return res.status(400).json({
+        return res.status(401).json({
           error: error,
         });
       }
@@ -49,7 +59,7 @@ const Register = (req, res) => {
 
       newUser.save(async (error) => {
         if (error) {
-          return res.status(400).json({
+          return res.status(401).json({
             message: 'nonon',
             errors: error,
           });

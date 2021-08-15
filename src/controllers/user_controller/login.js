@@ -1,10 +1,28 @@
 const User = require('../../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 
-const Login = (req, res) => {
+
+const Login = async (req, res) => {
   const _email = req.body.email;
   const _password = req.body.password;
+
+  await body('email').isEmail().run(req);
+  await body('password').isLength({ min: 4 }).run(req);
+
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(401).json({ 
+      error: true,
+      message :"L'un ou plusieur des donnees obligatoire ne sont pas conforme " });
+  }
+
+  const secretToken = process.env.ACCESS_TOKEN_SECRET ;
+  const tokenExpire = process.env.ACCESS_TOKEN_EXPIRY;
+  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+  const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY;
+
 
   if (_email && _password) {
     User.findOne({ email: _email }, (error, user) => {
@@ -38,17 +56,31 @@ const Login = (req, res) => {
             });
           }
 
-          const payload = {
-            sub: user._id,
-            email: user.email,
-          };
+          // Payload inside access-token
+        const payload = {
+          id: user._id,
+          email: user.email,
+        };
 
-          const refreshtoken = await jwt.sign(payload, 'secretKey');
-          const valueToken = {
-            token: user.token,
-            refresh_token: refreshtoken,
-            createdAt: user.createdAt,
-          }
+         // access-token-generate
+        const _token = await jwt.sign(
+          { email: _email },
+          secretToken,
+          {expiresIn:tokenExpire}
+        );
+
+        // reresh-token generation
+        const refreshtoken = await jwt.sign(
+          payload,
+          refreshTokenSecret,
+          {expiresIn: refreshTokenExpiry,}
+        );
+        
+        const valueToken = {
+          token: _token,
+          refresh_token: refreshtoken,
+          createdAt: user.createdAt,
+        }
 
           return res.status(200).json({
             error: true,

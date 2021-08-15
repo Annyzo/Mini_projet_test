@@ -4,14 +4,14 @@ require('dotenv').config();
 
 
 
-const ShowAllUser = async (req, res) => {
+const ShowAllUser =  (req, res) => {
   const _token = req.params.token;
   const secretToken = process.env.ACCESS_TOKEN_SECRET ;
 
 
   // verify et decode le token pour chercher l'email
   
-  jwt.verify(_token, secretToken, (eror, decoded) => {
+  jwt.verify(_token, secretToken, async(eror, decoded) => {
 
     if (eror) {
        if (eror.message = "invalid token"){
@@ -28,14 +28,12 @@ const ShowAllUser = async (req, res) => {
     }
 
     if (decoded){
-      User.find({}, (error, user) => {
-        if (user) {
-          return res.status(200).json({
-            error: false,
-            user
-          });
-        }
-      })
+        const user_all = await User.find({},{_id:0}).select('firstname lastname email sexe')
+
+        return res.status(200).json({
+        error: false,
+        user_all
+        });
     }
 
    
